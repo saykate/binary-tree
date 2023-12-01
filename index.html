@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>binarySearchTree</title>
+</head>
+<body>
+    <script>
+        const testArr = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324];
+
+        //Merge function for merging sorted arrays
+        function merge(left, right) {
+        let array = [];
+        while (left.length && right.length) {
+            if (left[0] < right[0]) {
+                array.push(left.shift())
+            } else {
+                array.push(right.shift())
+            }
+        }
+        return [...array, ...left, ...right]
+        }
+        
+        //Merge sort for sorting an array
+        function mergeSort(arr) {
+            let middle = arr.length / 2;
+            
+            if (arr.length < 2) {
+                return arr
+            }
+
+            let left = arr.splice(0, middle);
+
+           return merge(mergeSort(left), mergeSort(arr))
+
+        }
+
+        //Remove duplicate elements from an array
+        function checkForDupes(arr) {
+            return arr.filter((item,
+        index) => arr.indexOf(item) === index);
+        }
+
+        //Node factory for creating tree nodes
+        const node = function(data, right = null, left = null) {
+            return { 
+                nodeData: data,
+                rightChild: right, 
+                leftChild: left }
+        }
+
+        //Build binary search tree from a sorted array
+        const buildTree = function(arr) {
+            let sortedArr = mergeSort(checkForDupes(arr));
+            let rootIndex = Math.floor(sortedArr.length / 2);
+            let root = node(sortedArr[rootIndex]);
+
+            //call tree function to build tree 
+            tree(root, sortedArr);
+
+            return { root, sortedArr }
+        }
+
+        //recursive function to build tree
+        const tree = function(root, sortedArr) {
+            if (sortedArr.length === 0) return null;
+            let middle = Math.floor(sortedArr.length / 2);
+
+            //create nodes for left and right children
+            root.leftChild = node(sortedArr[middle]);
+            root.rightChild = node(sortedArr[middle + 1]);
+
+            //recursively build left and right subtree
+            tree(root.leftChild, sortedArr.slice(0, middle));
+            tree(root.rightChild, sortedArr.slice(middle + 1));
+
+            //return root if needed
+            return root;
+        }
+
+       
+        console.log(buildTree(testArr))
+
+
+const prettyPrint = (node, prefix = "", isLeft = true) => {
+  if (node === null) {
+    return;
+  }
+  if (node.rightChild !== null) {
+    prettyPrint(node.rightChild, `${prefix}${isLeft ? "│   " : "    "}`, false);
+  }
+  console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.nodeData}`);
+  if (node.leftChild !== null) {
+    prettyPrint(node.leftChild, `${prefix}${isLeft ? "    " : "│   "}`, true);
+  }
+};
+
+const treeRoot = node();
+tree(treeRoot, testArr);
+prettyPrint(treeRoot);
+    </script>
+</body>
+</html>
