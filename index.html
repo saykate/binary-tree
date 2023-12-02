@@ -69,12 +69,31 @@
       };
 
       const insert = function(tree, item) {
-        if(tree === []) {
-            tree.root = node(item);
-            console.log(tree.root)
+       if(!tree || !tree.root) {
+        console.log({ root: node(item) });
+        return { root: node(item) }
+       } else {
+        const searchTree = function(item) {
+        if(item < tree.root.nodeData) {
+          console.log('we are on the left')
+          if(tree.root.leftChild === null) {
+           return tree.root.leftChild = node(item)
+          } else if (tree.root.leftChild !== null) {
+            return searchTree(tree.root.leftChild)
+          } 
+          } else if(item > tree.root.nodeData) {
+          console.log('we are on the right')
+          if(tree.root.rightChild === null) {
+           return tree.root.rightChild = node(item)
+          } else if (tree.root.rightChild !== null) {
+            return searchTree(tree.root.rightChild)
+          } 
         } else {
-            console.log("we're doin stuff")
-        }
+            return null;
+          }
+      };
+        searchTree(item);
+      } console.log(tree.root)
       }
 
       const prettyPrint = (node, prefix = "", isLeft = true) => {
@@ -98,9 +117,11 @@
         }
       };
 
-      const treeRoot = buildTree(testArr);
-    //   insert(treeRoot, 5);
+      const treeRoot = buildTree([6, 7, 8]);
+      insert(treeRoot, 5);
       prettyPrint(treeRoot);
+      
+      
     </script>
   </body>
 </html>
