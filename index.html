@@ -1,105 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>binarySearchTree</title>
-</head>
-<body>
+  </head>
+  <body>
     <script>
-        const testArr = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324];
+      const testArr = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324];
 
-        //Merge function for merging sorted arrays
-        function merge(left, right) {
+      //Merge function for merging sorted arrays
+      function merge(left, right) {
         let array = [];
         while (left.length && right.length) {
-            if (left[0] < right[0]) {
-                array.push(left.shift())
-            } else {
-                array.push(right.shift())
-            }
+          if (left[0] < right[0]) {
+            array.push(left.shift());
+          } else {
+            array.push(right.shift());
+          }
         }
-        return [...array, ...left, ...right]
-        }
-        
-        //Merge sort for sorting an array
-        function mergeSort(arr) {
-            let middle = arr.length / 2;
-            
-            if (arr.length < 2) {
-                return arr
-            }
+        return [...array, ...left, ...right];
+      }
 
-            let left = arr.splice(0, middle);
+      //Merge sort for sorting an array
+      function mergeSort(arr) {
+        let middle = arr.length / 2;
 
-           return merge(mergeSort(left), mergeSort(arr))
-
+        if (arr.length < 2) {
+          return arr;
         }
 
-        //Remove duplicate elements from an array
-        function checkForDupes(arr) {
-            return arr.filter((item,
-        index) => arr.indexOf(item) === index);
-        }
+        let left = arr.splice(0, middle);
 
-        //Node factory for creating tree nodes
-        const node = function(data, right = null, left = null) {
-            return { 
-                nodeData: data,
-                rightChild: right, 
-                leftChild: left }
-        }
+        return merge(mergeSort(left), mergeSort(arr));
+      }
 
-        //Build binary search tree from a sorted array
-        const buildTree = function(arr) {
-            let sortedArr = mergeSort(checkForDupes(arr));
-            let rootIndex = Math.floor(sortedArr.length / 2);
-            let root = node(sortedArr[rootIndex]);
+      //Remove duplicate elements from an array
+      function checkForDupes(arr) {
+        return arr.filter((item, index) => arr.indexOf(item) === index);
+      }
 
-            //call tree function to build tree 
-            tree(root, sortedArr);
+      //Node factory for creating tree nodes
+      const node = function (data, right = null, left = null) {
+        return {
+          nodeData: data,
+          rightChild: right,
+          leftChild: left,
+        };
+      };
 
-            return { root, sortedArr }
-        }
+      //Build binary search tree from a sorted array
+      const buildTree = function(arr) {
+        let sortedArr = mergeSort(checkForDupes(arr));
+        if(sortedArr.length < 1) return null;
 
-        //recursive function to build tree
-        const tree = function(root, sortedArr) {
-            if (sortedArr.length === 0) return null;
-            let middle = Math.floor(sortedArr.length / 2);
+        const rootIndex = parseInt(sortedArr.length / 2);
+        const root = node(sortedArr[rootIndex]);
 
-            //create nodes for left and right children
-            root.leftChild = node(sortedArr[middle]);
-            root.rightChild = node(sortedArr[middle + 1]);
+        root.leftChild = buildTree(sortedArr.slice(0, rootIndex))
+        root.rightChild = buildTree(sortedArr.slice(rootIndex + 1));
 
-            //recursively build left and right subtree
-            tree(root.leftChild, sortedArr.slice(0, middle));
-            tree(root.rightChild, sortedArr.slice(middle + 1));
+        return { root };
+      };
 
-            //return root if needed
-            return root;
-        }
-
+      const tree = function() {
        
-        console.log(buildTree(testArr))
+      };
 
+      const insert = function(tree, item) {
+        if(tree === []) {
+            tree.root = node(item);
+            console.log(tree.root)
+        } else {
+            console.log("we're doin stuff")
+        }
+      }
 
-const prettyPrint = (node, prefix = "", isLeft = true) => {
-  if (node === null) {
-    return;
-  }
-  if (node.rightChild !== null) {
-    prettyPrint(node.rightChild, `${prefix}${isLeft ? "│   " : "    "}`, false);
-  }
-  console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.nodeData}`);
-  if (node.leftChild !== null) {
-    prettyPrint(node.leftChild, `${prefix}${isLeft ? "    " : "│   "}`, true);
-  }
-};
+      const prettyPrint = (node, prefix = "", isLeft = true) => {
+        if (node.root === null) {
+          return;
+        }
+        if (node.root.rightChild !== null) {
+          prettyPrint(
+            node.root.rightChild,
+            `${prefix}${isLeft ? "│   " : "    "}`,
+            false
+          );
+        }
+        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.root.nodeData}`);
+        if (node.root.leftChild !== null) {
+          prettyPrint(
+            node.root.leftChild,
+            `${prefix}${isLeft ? "    " : "│   "}`,
+            true
+          );
+        }
+      };
 
-const treeRoot = node();
-tree(treeRoot, testArr);
-prettyPrint(treeRoot);
+      const treeRoot = buildTree(testArr);
+    //   insert(treeRoot, 5);
+      prettyPrint(treeRoot);
     </script>
-</body>
+  </body>
 </html>
