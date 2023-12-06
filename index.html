@@ -50,77 +50,216 @@
         };
       };
 
+        const tree = (arr) => {
+        let root = null; 
+
       //Build binary search tree from a sorted array
       const buildTree = function(arr) {
         let sortedArr = mergeSort(checkForDupes(arr));
         if(sortedArr.length < 1) return null;
 
         const rootIndex = parseInt(sortedArr.length / 2);
-        const root = node(sortedArr[rootIndex]);
+        const newNode = node(sortedArr[rootIndex]);
 
-        root.leftChild = buildTree(sortedArr.slice(0, rootIndex))
-        root.rightChild = buildTree(sortedArr.slice(rootIndex + 1));
+        newNode.leftChild = buildTree(sortedArr.slice(0, rootIndex))
+        newNode.rightChild = buildTree(sortedArr.slice(rootIndex + 1));
 
-        return { root };
+        return newNode;
       };
 
-      const tree = function() {
-       
+      if (root === null) {
+          root = buildTree(arr)
+        }
+
+      const insert = function(item, parentNode = root) {
+        if(parentNode === item) return;
+        if(parentNode === null) {
+          return node(item) 
+        }
+
+        if (item < parentNode.nodeData) {
+            parentNode.leftChild = insert(item, parentNode.leftChild);
+          } else if (item > parentNode.nodeData) {
+            parentNode.rightChild = insert(item, parentNode.rightChild);
+          }
+      
+          return parentNode   
       };
 
-      const insert = function(tree, item) {
-       if(!tree || !tree.root) {
-        console.log({ root: node(item) });
-        return { root: node(item) }
-       } else {
-        const searchTree = function(item) {
-        if(item < tree.root.nodeData) {
-          console.log('we are on the left')
-          if(tree.root.leftChild === null) {
-           return tree.root.leftChild = node(item)
-          } else if (tree.root.leftChild !== null) {
-            return searchTree(tree.root.leftChild)
-          } 
-          } else if(item > tree.root.nodeData) {
-          console.log('we are on the right')
-          if(tree.root.rightChild === null) {
-           return tree.root.rightChild = node(item)
-          } else if (tree.root.rightChild !== null) {
-            return searchTree(tree.root.rightChild)
-          } 
-        } else {
+        const deleteNode = (currentNode, value) => {
+          if (currentNode === null) {
             return null;
           }
-      };
-        searchTree(item);
-      } console.log(tree.root)
+
+          if (value < currentNode.nodeData) {
+            currentNode.leftChild = deleteNode(currentNode.leftChild, value);
+          } else if (value > currentNode.nodeData) {
+            currentNode.rightChild = deleteNode(currentNode.rightChild, value);
+          } else {
+            if (!currentNode.leftChild) {
+              return currentNode.rightChild;
+            } else if (!currentNode.rightChild) {
+              return currentNode.leftChild;
+            }
+
+            let temp = currentNode.rightChild;
+
+            while (temp.leftChild !== null) {
+              temp = temp.leftChild;
+            }
+
+            currentNode.nodeData = temp.nodeData;
+            currentNode.rightChild = deleteNode(currentNode.rightChild, temp.nodeData);
+          }
+
+          return currentNode;
+        };
+
+    
+      const removeItem = function(value, currentNode = root) {
+        if (currentNode === null) return currentNode;
+        if (currentNode.nodeData === value) {
+          return deleteNode(currentNode)
+        } 
+
+        if (value < currentNode.nodeData) {
+          currentNode.leftChild = removeItem(value, currentNode.leftChild);
+        } else {
+          currentNode.rightChild = removeItem(value, currentNode.rightChild);
+        }
+        return currentNode
       }
 
-      const prettyPrint = (node, prefix = "", isLeft = true) => {
-        if (node.root === null) {
+      const find = function(item, currentNode = root) {
+        if (currentNode === null) {
+          return "That value doesn't exist in this tree";
+        }
+        if (item === currentNode.nodeData) {
+          return currentNode;
+        } else if (item < currentNode.nodeData) {
+          return find(item, currentNode.leftChild);
+        } else {
+          return find(item, currentNode.rightChild);
+        }
+      }; 
+
+      const levelOrder = (callback, arr = [root], result = []) => {
+        if (arr.length === 0) return result;
+        const queue = [];
+        for (const node of arr) {
+          if (callback) {
+            callback(node.nodeData);
+          } else {
+            result.push(node.nodeData)
+          }
+          if (node.leftChild) {
+            queue.push(node.leftChild);
+          }
+          if (node.rightChild) {
+            queue.push(node.rightChild);
+          }
+        }
+        return levelOrder(callback, queue, result);
+      }
+
+      const inOrder = (callback, currentNode = root, result =[]) => {
+        if (currentNode === null) return;
+       
+        inOrder(callback, currentNode.leftChild, result);
+
+        if (callback) {
+          callback(currentNode.nodeData);
+        } else {
+          result.push(currentNode.nodeData);
+        }
+
+        inOrder(callback, currentNode.rightChild, result);
+
+        if(result.length > 0) return result;
+      }
+
+      const preOrder = (callback, currentNode = root, result = []) => {
+        if (currentNode === null) return; 
+        if (callback) {
+          callback(currentNode.nodeData);
+        } else {
+          result.push(currentNode.nodeData);
+        }
+
+        preOrder(callback, currentNode.leftChild, result);
+        preOrder(callback, currentNode.rightChild, result);
+
+        if (result.length > 0) return result;
+      }
+
+      const postOrder = (callback, currentNode = root, result = []) => {
+        if (currentNode === null) return; 
+
+        postOrder(callback, currentNode.leftChild, result);
+        postOrder(callback, currentNode.rightChild, result);
+
+        if (callback) {
+          callback(currentNode.nodeData);
+        } else {
+          result.push(currentNode.nodeData);
+        }
+
+        if (result.length > 0) return result;
+      }
+
+      const height = (currentNode = root) => {
+        if (currentNode === null) return 0;
+
+        return Math.max(height(currentNode.leftChild), height(currentNode.rightChild)) + 1
+
+      }
+        
+      const prettyPrint = (node = root, prefix = "", isLeft = true) => {
+        if (node === null) {
           return;
         }
-        if (node.root.rightChild !== null) {
+        if (node.rightChild !== null) {
           prettyPrint(
-            node.root.rightChild,
+            node.rightChild,
             `${prefix}${isLeft ? "│   " : "    "}`,
             false
           );
         }
-        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.root.nodeData}`);
-        if (node.root.leftChild !== null) {
+        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.nodeData}`);
+        if (node.leftChild !== null) {
           prettyPrint(
-            node.root.leftChild,
+            node.leftChild,
             `${prefix}${isLeft ? "    " : "│   "}`,
             true
           );
         }
       };
 
-      const treeRoot = buildTree([6, 7, 8]);
-      insert(treeRoot, 5);
-      prettyPrint(treeRoot);
-      
+        return {
+          buildTree, 
+          insert, 
+          removeItem, 
+          find, 
+          levelOrder,
+          inOrder, 
+          preOrder,
+          postOrder,
+          height, 
+          prettyPrint
+      };
+    }
+
+      const treeRoot = tree(testArr);
+      treeRoot.insert(50);
+      treeRoot.prettyPrint();
+      treeRoot.removeItem(67);
+      treeRoot.prettyPrint();
+      console.log("Find:", treeRoot.find(23));
+      console.log("Level Order:", treeRoot.levelOrder());
+      console.log("In Order:", treeRoot.inOrder());
+      console.log("Pre Order:", treeRoot.preOrder());
+      console.log("Post Order:", treeRoot.postOrder());
+      console.log("Height:", treeRoot.height());
       
     </script>
   </body>
